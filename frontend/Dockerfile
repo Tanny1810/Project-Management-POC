@@ -1,7 +1,12 @@
-﻿FROM node:20-alpine
+FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
 EXPOSE 3000
 
-CMD ["sh", "-c", "while true; do sleep 3600; done"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
