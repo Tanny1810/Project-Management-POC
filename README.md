@@ -25,6 +25,29 @@ The system enforces rules such as employees cannot be assigned directly to proje
 - Database migrations using Alembic.
 - Docker Compose for easy local development and deployment.
 
+## Current Status
+
+### Built Features
+- **Backend API**: Complete RESTful API with FastAPI for managing employees, projects, tasks, and assignments.
+- **Database Models**: SQLAlchemy models for Employee, Project, Task, and Assignment with relationships.
+- **Frontend UI**: React-based interface with pages for dashboard, assignments, and data tables.
+- **Employee Management**: CRUD operations for employees with technical roles.
+- **Project and Task Management**: Hierarchical structure with projects containing tasks.
+- **Assignment System**: Assign employees to tasks with duration tracking and effort percentages.
+- **Availability Calculation**: Logic to calculate employee availability based on current assignments.
+- **Containerization**: Full Docker setup with Compose for easy deployment.
+- **Database Seeding**: Automatic seeding of initial data on startup.
+
+### In Progress / Future Enhancements
+- **User Authentication**: Adding login/logout functionality for managers.
+- **Advanced Filtering**: More sophisticated search and filter options in the UI.
+- **Reporting**: Dashboards for project progress, resource utilization, and workload reports.
+- **Notifications**: Alerts for assignment conflicts or upcoming task completions.
+- **Testing**: Comprehensive unit and integration tests.
+- **Production Deployment**: Configuration for cloud deployment (e.g., AWS, Heroku).
+
+This POC validates the core architecture and workflows. Further development can build upon this foundation.
+
 ## Screenshots
 
 ### Employee Dashboard

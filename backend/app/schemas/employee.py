@@ -1,4 +1,4 @@
-﻿import datetime as dt
+import datetime as dt
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
@@ -7,6 +7,7 @@ class EmployeeBase(BaseModel):
     name: str
     email: EmailStr
     role: str
+    tech_stack: str
 
 
 class EmployeeCreate(EmployeeBase):
@@ -17,6 +18,7 @@ class EmployeeUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
     role: str | None = None
+    tech_stack: str | None = None
 
 
 class EmployeeRead(EmployeeBase):

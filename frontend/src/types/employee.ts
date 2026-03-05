@@ -3,6 +3,7 @@ export interface Employee {
   name: string;
   email: string;
   role: string;
+  tech_stack: string;
 }
 
 export interface EmployeeAvailability {
@@ -15,4 +16,11 @@ export interface EmployeeAvailability {
 
 export interface EmployeeWithAvailability extends Employee {
   availability: EmployeeAvailability;
+}
+
+export interface EmployeeCreatePayload {
+  name: string;
+  email: string;
+  role: string;
+  tech_stack: string;
 }

@@ -1,4 +1,4 @@
-﻿from sqlalchemy import String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -11,5 +11,6 @@ class Employee(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(100), nullable=False)
+    tech_stack: Mapped[str] = mapped_column(String(255), nullable=False, default="general")
 
     assignments = relationship("Assignment", back_populates="employee", cascade="all, delete-orphan")

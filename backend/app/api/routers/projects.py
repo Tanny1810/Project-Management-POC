@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,8 +9,15 @@ from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
+def _validate_project_dates(start_date, end_date) -> None:
+    if end_date < start_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project end_date cannot be before start_date")
+
+
 @router.post("", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db_session)) -> Project:
+    _validate_project_dates(payload.start_date, payload.end_date)
+
     project = Project(**payload.model_dump())
     db.add(project)
     db.commit()
@@ -38,6 +45,10 @@ def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depend
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
     update_data = payload.model_dump(exclude_unset=True)
+    new_start = update_data.get("start_date", project.start_date)
+    new_end = update_data.get("end_date", project.end_date)
+    _validate_project_dates(new_start, new_end)
+
     for field, value in update_data.items():
         setattr(project, field, value)
 

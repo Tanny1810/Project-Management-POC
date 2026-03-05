@@ -1,34 +1,58 @@
-﻿-- Idempotent seed data for Employee Management POC.
+-- Idempotent seed data for Employee Management POC.
 -- Safe to run multiple times.
 
 -- Employees
-INSERT INTO employees (name, email, role)
+INSERT INTO employees (name, email, role, tech_stack)
 VALUES
-  ('Alice Smith', 'alice@example.com', 'Backend Engineer'),
-  ('Bob Johnson', 'bob@example.com', 'Frontend Engineer'),
-  ('Carol Davis', 'carol@example.com', 'QA Engineer'),
-  ('Dev Mehta', 'dev@example.com', 'DevOps Engineer')
+  ('Alice Smith', 'alice@example.com', 'Backend Engineer', 'python,fastapi,postgresql'),
+  ('Bob Johnson', 'bob@example.com', 'Backend Engineer', '.net,c#,sqlserver'),
+  ('Carol Davis', 'carol@example.com', 'QA Engineer', 'postman,selenium,python'),
+  ('Dev Mehta', 'dev@example.com', 'DevOps Engineer', 'docker,kubernetes,aws')
 ON CONFLICT (email)
 DO UPDATE SET
   name = EXCLUDED.name,
-  role = EXCLUDED.role;
+  role = EXCLUDED.role,
+  tech_stack = EXCLUDED.tech_stack;
 
--- Projects
-INSERT INTO projects (name, description)
-SELECT 'Customer Portal', 'Internal portal for customer management'
+-- Projects (update first, then insert missing)
+UPDATE projects
+SET description = 'Internal portal for customer management',
+    start_date = DATE '2026-01-01',
+    end_date = DATE '2026-12-31'
+WHERE name = 'Customer Portal';
+
+INSERT INTO projects (name, description, start_date, end_date)
+SELECT 'Customer Portal', 'Internal portal for customer management', DATE '2026-01-01', DATE '2026-12-31'
 WHERE NOT EXISTS (
   SELECT 1 FROM projects WHERE name = 'Customer Portal'
 );
 
-INSERT INTO projects (name, description)
-SELECT 'Mobile App Revamp', 'Redesign and rebuild core mobile app flows'
+UPDATE projects
+SET description = 'Redesign and rebuild core mobile app flows',
+    start_date = DATE '2026-01-01',
+    end_date = DATE '2026-10-31'
+WHERE name = 'Mobile App Revamp';
+
+INSERT INTO projects (name, description, start_date, end_date)
+SELECT 'Mobile App Revamp', 'Redesign and rebuild core mobile app flows', DATE '2026-01-01', DATE '2026-10-31'
 WHERE NOT EXISTS (
   SELECT 1 FROM projects WHERE name = 'Mobile App Revamp'
 );
 
--- Tasks
-INSERT INTO tasks (project_id, title, description, status)
-SELECT p.id, 'Build authentication service', 'Develop login and JWT authentication', 'open'
+-- Tasks (update first, then insert missing)
+UPDATE tasks t
+SET description = 'Develop login and JWT authentication',
+    status = 'open',
+    required_stack = 'python',
+    start_date = DATE '2026-02-01',
+    end_date = DATE '2026-06-30'
+FROM projects p
+WHERE t.project_id = p.id
+  AND p.name = 'Customer Portal'
+  AND t.title = 'Build authentication service';
+
+INSERT INTO tasks (project_id, title, description, status, required_stack, start_date, end_date)
+SELECT p.id, 'Build authentication service', 'Develop login and JWT authentication', 'open', 'python', DATE '2026-02-01', DATE '2026-06-30'
 FROM projects p
 WHERE p.name = 'Customer Portal'
   AND NOT EXISTS (
@@ -37,8 +61,19 @@ WHERE p.name = 'Customer Portal'
       AND t.title = 'Build authentication service'
   );
 
-INSERT INTO tasks (project_id, title, description, status)
-SELECT p.id, 'Create customer dashboard UI', 'Implement dashboard and responsive layout', 'open'
+UPDATE tasks t
+SET description = 'Implement dashboard and responsive layout',
+    status = 'open',
+    required_stack = '.net',
+    start_date = DATE '2026-03-01',
+    end_date = DATE '2026-07-31'
+FROM projects p
+WHERE t.project_id = p.id
+  AND p.name = 'Customer Portal'
+  AND t.title = 'Create customer dashboard UI';
+
+INSERT INTO tasks (project_id, title, description, status, required_stack, start_date, end_date)
+SELECT p.id, 'Create customer dashboard UI', 'Implement dashboard and responsive layout', 'open', '.net', DATE '2026-03-01', DATE '2026-07-31'
 FROM projects p
 WHERE p.name = 'Customer Portal'
   AND NOT EXISTS (
@@ -47,8 +82,19 @@ WHERE p.name = 'Customer Portal'
       AND t.title = 'Create customer dashboard UI'
   );
 
-INSERT INTO tasks (project_id, title, description, status)
-SELECT p.id, 'Add regression test suite', 'Automate smoke and regression test cases', 'open'
+UPDATE tasks t
+SET description = 'Automate smoke and regression test cases',
+    status = 'open',
+    required_stack = 'python',
+    start_date = DATE '2026-03-01',
+    end_date = DATE '2026-09-30'
+FROM projects p
+WHERE t.project_id = p.id
+  AND p.name = 'Mobile App Revamp'
+  AND t.title = 'Add regression test suite';
+
+INSERT INTO tasks (project_id, title, description, status, required_stack, start_date, end_date)
+SELECT p.id, 'Add regression test suite', 'Automate smoke and regression test cases', 'open', 'python', DATE '2026-03-01', DATE '2026-09-30'
 FROM projects p
 WHERE p.name = 'Mobile App Revamp'
   AND NOT EXISTS (
@@ -58,11 +104,6 @@ WHERE p.name = 'Mobile App Revamp'
   );
 
 -- Assignments
--- Scenario coverage:
--- 1) Alice: unassigned -> 100% available.
--- 2) Bob: 100% occupied in March 2026 -> available from April 2026.
--- 3) Carol: 50% allocated -> 50% available for other tasks.
-
 INSERT INTO assignments (employee_id, task_id, duration_months, effort_percentage, start_date)
 SELECT e.id, t.id, 1, 100, DATE '2026-03-01'
 FROM employees e
