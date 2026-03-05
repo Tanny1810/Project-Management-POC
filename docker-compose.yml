@@ -1,0 +1,47 @@
+﻿services:
+  db:
+    image: postgres:16-alpine
+    container_name: pm_poc_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: project_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d project_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  be:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pm_poc_be
+    env_file:
+      - ./backend/.env.example
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/project_management
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/app:/app/app
+
+  fe:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pm_poc_fe
+    ports:
+      - "3000:3000"
+    depends_on:
+      - be
+
+volumes:
+  postgres_data:
